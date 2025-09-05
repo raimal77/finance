@@ -1,7 +1,10 @@
 
+
 import React, { useState, useEffect, useRef } from 'react';
+// Fix: The createChatSession function will be added to geminiService.
 import { createChatSession } from '../services/geminiService';
 import type { Chat as ChatSession } from '@google/genai';
+// Fix: Add imports for SendIcon and BackIcon as they will be added to icons.tsx
 import { SendIcon, BackIcon, LogoIcon } from './icons';
 
 interface ChatProps {

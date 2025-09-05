@@ -1,87 +1,90 @@
-
 import React from 'react';
-import type { AnalysisResult } from '../types';
+import type { Transaction, AnalysisResult, TransactionCategory } from '../types';
 import StatCard from './StatCard';
 import SpendingChart from './SpendingChart';
-import TrendChart from './TrendChart';
 import AiInsights from './AiInsights';
-import { IncomeIcon, ExpenseIcon, SavingsIcon, ChartBarIcon, ResetIcon } from './icons';
+import AddTransactionForm from './AddTransactionForm';
+import TransactionList from './TransactionList';
+import LoadingSpinner from './LoadingSpinner';
+import { ExpenseIcon, ChartBarIcon, ErrorIcon } from './icons';
 
 interface DashboardProps {
-  analysis: AnalysisResult;
-  transactionsCount: number;
-  onReset: () => void;
+  transactions: Transaction[];
+  analysis: AnalysisResult | null;
+  onAddTransaction: (transaction: Omit<Transaction, 'id' | 'date'>) => void;
+  onDeleteTransaction: (id: string) => void;
+  isLoadingAnalysis: boolean;
+  error: string | null;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ analysis, transactionsCount, onReset }) => {
-  const { summary, spendingByCategory, monthlyTrend, insights } = analysis;
+const Dashboard: React.FC<DashboardProps> = ({ 
+    transactions, 
+    analysis, 
+    onAddTransaction, 
+    onDeleteTransaction,
+    isLoadingAnalysis,
+    error 
+}) => {
+  const { summary, spendingByCategory, insights } = analysis || {};
 
   return (
-    <div className="w-full flex flex-col gap-6 animate-fade-in">
-        <div className="flex justify-between items-center">
-            <div>
-                <h2 className="text-3xl font-bold text-white">AI Financial Report</h2>
-                <p className="text-gray-400">Analysis based on {transactionsCount} transactions.</p>
-            </div>
-            <button 
-                onClick={onReset}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-gray-200 font-semibold rounded-md transition-colors"
-            >
-                <ResetIcon className="w-4 h-4" />
-                New Report
-            </button>
-        </div>
-
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard 
-            title="Total Income" 
-            value={summary.totalIncome} 
-            icon={<IncomeIcon />} 
-            format="currency" 
-            color="emerald" 
-        />
-        <StatCard 
-            title="Total Expenses" 
-            value={summary.totalExpenses} 
-            icon={<ExpenseIcon />} 
-            format="currency" 
-            color="red"
-        />
-        <StatCard 
-            title="Net Savings" 
-            value={summary.netSavings} 
-            icon={<SavingsIcon />} 
-            format="currency" 
-            color="cyan"
-        />
-        <StatCard 
-            title="Savings Rate" 
-            value={summary.savingsRate} 
-            icon={<ChartBarIcon />} 
-            format="percent" 
-            color="violet"
-        />
-      </div>
-
-      {/* Charts Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-        <div className="lg:col-span-2 p-6 bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl">
-          <h3 className="text-xl font-semibold text-white mb-4">Spending by Category</h3>
-          <SpendingChart data={spendingByCategory} />
-        </div>
-        <div className="lg:col-span-3 p-6 bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl">
-          <h3 className="text-xl font-semibold text-white mb-4">Income vs. Expense Trend</h3>
-          <TrendChart data={monthlyTrend} />
-        </div>
+    <div className="w-full grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* Left Column: Form and Transaction List */}
+      <div className="lg:col-span-1 flex flex-col gap-6">
+        <AddTransactionForm onAddTransaction={onAddTransaction} />
+        <TransactionList transactions={transactions} onDeleteTransaction={onDeleteTransaction} />
       </div>
       
-      {/* AI Insights */}
-       <div className="p-6 bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl">
-           <h3 className="text-xl font-semibold text-white mb-4">AI-Powered Insights</h3>
-           <AiInsights insights={insights} />
-       </div>
-
+      {/* Right Column: Analysis */}
+      <div className="lg:col-span-2 flex flex-col gap-6">
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <StatCard 
+              title="Total Expenses" 
+              value={summary?.totalExpenses ?? 0}
+              icon={<ExpenseIcon />} 
+              format="currency" 
+              color="rose" 
+          />
+          <StatCard 
+              title="Top Category" 
+              value={summary?.topCategory ?? 'N/A'}
+              icon={<ChartBarIcon />} 
+              color="indigo"
+          />
+        </div>
+        
+        {/* Chart and Insights */}
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+           <h3 className="text-xl font-semibold text-gray-800 mb-4">Analysis & Insights</h3>
+           {isLoadingAnalysis && <LoadingSpinner />}
+           {error && (
+             <div className="text-center p-4 bg-red-50 border border-red-200 rounded-lg">
+                <ErrorIcon className="w-8 h-8 mx-auto mb-2 text-red-500" />
+                <h4 className="font-semibold text-red-700">Analysis Failed</h4>
+                <p className="text-sm text-red-600">{error}</p>
+             </div>
+           )}
+           {!isLoadingAnalysis && !error && analysis && (
+               <div className="grid grid-cols-1 md:grid-cols-5 gap-6 items-center">
+                    <div className="md:col-span-2">
+                        <h4 className="text-lg font-medium text-gray-700 mb-2 text-center">Spending Breakdown</h4>
+                        <SpendingChart data={spendingByCategory ?? []} />
+                    </div>
+                    <div className="md:col-span-3">
+                        <h4 className="text-lg font-medium text-gray-700 mb-2">AI-Powered Insights</h4>
+                        <AiInsights insights={insights ?? []} />
+                    </div>
+               </div>
+           )}
+            {!isLoadingAnalysis && !error && !analysis && transactions.length > 0 && (
+                <p className="text-center text-gray-500 py-8">Could not retrieve analysis.</p>
+            )}
+            {!isLoadingAnalysis && transactions.length === 0 && (
+                 <p className="text-center text-gray-500 py-8">Add a transaction to get started!</p>
+            )}
+        </div>
+      </div>
     </div>
   );
 };

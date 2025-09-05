@@ -3,33 +3,38 @@ import React from 'react';
 
 interface StatCardProps {
   title: string;
-  value: number;
-  icon: React.ReactNode;
-  format?: 'currency' | 'percent';
-  color: 'emerald' | 'red' | 'cyan' | 'violet';
+  value: number | string;
+  // Fix: Use React.ReactElement for the icon prop to ensure it can be cloned with new props.
+  icon: React.ReactElement;
+  format?: 'currency';
+  color: 'rose' | 'indigo';
 }
 
 const colorClasses = {
-    emerald: 'from-emerald-500 to-green-500',
-    red: 'from-red-500 to-rose-500',
-    cyan: 'from-cyan-500 to-blue-500',
-    violet: 'from-violet-500 to-purple-500',
+    rose: {
+        bg: 'from-rose-500 to-red-500',
+        text: 'text-rose-600',
+    },
+    indigo: {
+        bg: 'from-indigo-500 to-violet-500',
+        text: 'text-indigo-600',
+    }
 };
 
-const StatCard: React.FC<StatCardProps> = ({ title, value, icon, format = 'currency', color }) => {
-  const formattedValue = format === 'currency'
+const StatCard: React.FC<StatCardProps> = ({ title, value, icon, format, color }) => {
+  const formattedValue = (format === 'currency' && typeof value === 'number')
     ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value)
-    : `${value.toFixed(2)}%`;
+    : value;
 
   return (
-    <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-6 flex items-center gap-6 relative overflow-hidden">
-        <div className={`absolute top-0 left-0 h-1 w-full bg-gradient-to-r ${colorClasses[color]}`}></div>
-        <div className={`flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center bg-gradient-to-br ${colorClasses[color]} text-white shadow-lg`}>
-            {icon}
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 flex items-center gap-5">
+        <div className={`flex-shrink-0 w-12 h-12 rounded-lg flex items-center justify-center bg-gradient-to-br ${colorClasses[color].bg} text-white shadow-lg`}>
+            {/* Fix: Removed unnecessary type assertion after correcting the prop type */}
+            {React.cloneElement(icon, { className: "w-6 h-6"})}
         </div>
         <div>
-            <p className="text-sm text-gray-400">{title}</p>
-            <p className="text-2xl font-bold text-white">{formattedValue}</p>
+            <p className="text-sm text-gray-500">{title}</p>
+            <p className="text-2xl font-bold text-gray-800">{formattedValue}</p>
         </div>
     </div>
   );

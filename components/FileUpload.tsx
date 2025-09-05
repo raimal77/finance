@@ -1,5 +1,7 @@
 
+
 import React, { useCallback, useState } from 'react';
+// Fix: Add UploadIcon and BackIcon to imports as they will be added to icons.tsx
 import { UploadIcon, BackIcon } from './icons';
 
 interface FileUploadProps {
@@ -79,7 +81,8 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileUpload, onBack }) => {
           <p className="text-lg font-medium text-gray-300">
             <span className="text-cyan-400 font-semibold">Click to upload</span> or drag and drop
           </p>
-          <p className="text-sm text-gray-500">CSV file required (e.g., Date,Description,Amount,Type)</p>
+          {/* Fix: Update hint text to use Category instead of Type */}
+          <p className="text-sm text-gray-500">CSV file required (e.g., Date,Description,Amount,Category)</p>
         </div>
       </div>
     </div>

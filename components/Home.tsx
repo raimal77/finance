@@ -1,5 +1,7 @@
 
+
 import React from 'react';
+// Fix: Add imports for AnalyzeIcon and ChatIcon as they will be added to icons.tsx
 import { AnalyzeIcon, ChatIcon } from './icons';
 
 interface HomeProps {

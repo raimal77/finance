@@ -1,22 +1,19 @@
+export type TransactionCategory = 'Food' | 'Transport' | 'Shopping' | 'Entertainment' | 'Utilities' | 'Health' | 'Other';
 
 export interface Transaction {
+  id: string;
   date: string;
   description: string;
   amount: number;
-  type: 'income' | 'expense';
-  category?: string; // AI will populate this
+  category: TransactionCategory;
 }
 
 export interface AnalysisResult {
   summary: {
-    totalIncome: number;
     totalExpenses: number;
-    netSavings: number;
-    largestExpenseCategory: string;
-    savingsRate: number;
+    topCategory: string;
   };
   spendingByCategory: { name: string; value: number }[];
-  monthlyTrend: { name: string; income: number; expenses: number }[];
   insights: {
     title: string;
     description: string;
